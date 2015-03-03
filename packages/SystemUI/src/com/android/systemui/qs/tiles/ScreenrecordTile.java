@@ -85,7 +85,7 @@ public class ScreenrecordTile extends QSTileImpl<BooleanState> {
         try {
              Thread.sleep(1000); //1s
         } catch (InterruptedException ie) {}
-        HavocUtils.takeScreenrecord(mMode);
+        FrankenUtils.takeScreenrecord(mMode);
     }
 
     @Override

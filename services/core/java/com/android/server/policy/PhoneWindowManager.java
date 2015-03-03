@@ -6685,7 +6685,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return;
             }
             ComponentName cn = new ComponentName("com.android.systemui",
-                    "com.android.systemui.liquid.screenrecord.TakeScreenrecordService");
+                    "com.android.systemui.franken.screenrecord.TakeScreenrecordService");
             Intent intent = new Intent();
             intent.setComponent(cn);
             ServiceConnection conn = new ServiceConnection() {
