@@ -4670,6 +4670,12 @@ public final class Settings {
         public static final String SCREEN_ON_ANIMATION = "screen_on_animation";
 
         /**
+         * Disabled Transition animations of the android system
+         * @hide
+         */
+        public static final String DISABLE_TRANSITION_ANIMATIONS = "disable_transition_animations";
+
+        /**
          * Whether to control brightness from status bar
          * @hide
          */
