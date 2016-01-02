@@ -151,5 +151,9 @@ oneway interface IStatusBar
     // Used to hide the fingerprint dialog when the authenticationclient is stopped
     void hideFingerprintDialog();
 
+    /**
+     * LIQUID
+     */
     void toggleCameraFlash();
+    void setAutoRotate(boolean enabled);
 }

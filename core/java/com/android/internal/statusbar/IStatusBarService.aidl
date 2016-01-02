@@ -106,6 +106,7 @@ interface IStatusBarService
      * FRANKEN
      */
     void toggleCameraFlash();
+    void setAutoRotate(boolean enabled);
     void toggleRecentApps();
     void toggleSplitScreen();
     void preloadRecentApps();
