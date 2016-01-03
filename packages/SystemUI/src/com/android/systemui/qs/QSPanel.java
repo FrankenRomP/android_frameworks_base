@@ -30,11 +30,14 @@ import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
+import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.quicksettings.Tile;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.android.internal.logging.MetricsLogger;
@@ -109,6 +112,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
         mBrightnessView = LayoutInflater.from(mContext).inflate(
             R.layout.quick_settings_brightness_dialog, this, false);
+        ImageView brightnessIcon = (ImageView) findViewById(R.id.brightness_icon);
+        brightnessIcon.setVisibility(View.VISIBLE);
         addView(mBrightnessView);
 
         mBrightnessIcon = (ImageView) findViewById(R.id.brightness_icon);
