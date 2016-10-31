@@ -30,8 +30,9 @@
     <string name="quick_settings_sound_vibrate">Вибрация</string>
     <string name="quick_settings_sound_dnd">Не беспокоить</string>
 
-    <string name="statusbar_items_title">Редактирование иконок</string>
+    <!-- QS Config -->
+    <string name="qs_menu_item_columns">Столбцы</string>
+    <string name="qs_menu_item_columns_landscape">Столбцы в ландш.</string>
+    <string name="qs_menu_item_reset">Сброс</string>
 
-    <string name="lockscreen_default">По умолчанию</string>
-    <string name="lockscreen_hidden">Нет</string>
 </resources>
