@@ -8665,20 +8665,14 @@ public final class Settings {
         public static final String NAVIGATION_BAR_VISIBLE = "navigation_bar_visible";
 
         /**
-         * Display style of the status bar battery information
-         * 0: Display the battery an icon in portrait mode
-         * 1: Display the battery as a circle
-         * 2: Display the battery as a dotted circle
-         * 3: Display the battery as text
-         * 4: Do not display the battery
-         * default: 0
+         * Whether to set a lower brightness level when enabling night mode
+         * 0: Disabled
+         * 1: Set the brightness to a very low value
+         * 2: Set the brightness to a low value
+         * 3: Set the brightness to a medium value
          * @hide
          */
-        public static final String STATUS_BAR_BATTERY_STYLE = "status_bar_battery_style";
-
-        /** @hide */
-        public static final Validator STATUS_BAR_BATTERY_STYLE_VALIDATOR =
-                new SettingsValidators.InclusiveIntegerRangeValidator(0, 4);
+        public static final String NIGHT_BRIGHTNESS_VALUE = "night_brightness_value";
 
         /**
          * This are the settings to be backed up.
