@@ -59,6 +59,10 @@
     <string name="accessibility_quick_settings_sync_changed_off">Sync turned off</string>
     <string name="accessibility_quick_settings_sync_changed_on">Sync turned on</string>
 
-    <!-- Statusbae icon -->
+    <!-- Statusbar icon -->
     <string name="statusbar_items_title">Statusbar icon</string>
+
+    <!-- LockScreen Stuff -->
+    <string name="lockscreen_default">Default</string>
+    <string name="lockscreen_hidden">None</string>
 </resources>
