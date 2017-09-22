@@ -77,4 +77,11 @@
     <string name="qs_menu_item_rows_three">3</string>
     <string name="qs_menu_item_rows_four">4</string>
 
+    <!-- Statusbar icon -->
+    <string name="statusbar_items_title">Statusbar icon</string>
+
+    <!-- LockScreen Stuff -->
+    <string name="lockscreen_default">Default</string>
+    <string name="lockscreen_hidden">None</string>
+
 </resources>
