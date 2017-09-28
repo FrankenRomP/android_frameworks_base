@@ -24,4 +24,7 @@
     <dimen name="net_traffic_multi_text_size">8dp</dimen>
     <dimen name="net_traffic_txt_img_padding">2dp</dimen>
 
+    <!-- Height of the status bar header bar -->
+    <dimen name="status_bar_header_height">130dp</dimen>
+
 </resources>
