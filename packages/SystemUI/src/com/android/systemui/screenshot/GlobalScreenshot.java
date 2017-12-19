@@ -34,6 +34,8 @@ import android.app.Notification.BigPictureStyle;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -77,6 +79,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
+import com.android.internal.util.liquid.LiquidUtils;
 import com.android.systemui.R;
 import com.android.systemui.SystemUI;
 import com.android.systemui.util.NotificationChannels;
@@ -127,7 +130,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final NotificationManager mNotificationManager;
     private final Notification.Builder mNotificationBuilder, mPublicNotificationBuilder;
     private final File mScreenshotDir;
-    private final String mImageFileName;
+    private String mImageFileName;
     private final String mImageFilePath;
     private final long mImageTime;
     private final BigPictureStyle mNotificationStyle;
@@ -159,15 +162,16 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         mParams = data;
         mImageTime = System.currentTimeMillis();
         String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
-        CharSequence appName = getRunningActivityName(context);
-        boolean onKeyguard = context.getSystemService(KeyguardManager.class).isKeyguardLocked();
-        if (!onKeyguard && appName != null) {
-            // Replace all spaces and special chars with an underscore
-            String appNameString = appName.toString().replaceAll("[\\\\/:*?\"<>|\\s]+", "_");
-            mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE_APPNAME,
-                    appNameString, imageDate);
-        } else {
-            mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
+        mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
+        final PackageManager pm = context.getPackageManager();
+        ActivityInfo info = LiquidUtils.getRunningActivityInfo(context);
+        if (info != null) {
+            CharSequence appName = pm.getApplicationLabel(info.applicationInfo);
+            if (appName != null) {
+                // replace all spaces and special chars with an underscore
+                String appNameString = appName.toString().replaceAll("[^a-zA-Z0-9]+","_");
+                mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE_APPNAME, appNameString, imageDate);
+            }
         }
 
         mScreenshotDir = new File(Environment.getExternalStoragePublicDirectory(
