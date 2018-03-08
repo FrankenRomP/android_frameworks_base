@@ -43,4 +43,10 @@
     <string name="config_deviceKeyHandlerLib" translatable="false"></string>
     <!-- Name of that key handler class -->
     <string name="config_deviceKeyHandlerClass" translatable="false"></string>
+
+    <!-- The list of vendor package signatures that should also be considered
+       platform signatures, specifically for use on devices with a vendor partition. -->
+    <string-array name="config_vendorPlatformSignatures">
+    </string-array>
+
 </resources>
