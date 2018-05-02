@@ -48,4 +48,7 @@
     <string name="animation_random">Random</string>
     <string name="action_null">Blank</string>
 
+    <!-- App Blacklist -->
+    <string name="app_blacklist">Blacklist app</string>
+
 </resources>
