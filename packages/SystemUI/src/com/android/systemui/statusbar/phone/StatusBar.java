@@ -145,6 +145,7 @@ import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.franken.FrankenUtils;
 import com.android.internal.util.franken.DeviceUtils;
+import com.android.internal.statusbar.ThemeAccentUtils;
 import com.android.internal.util.hwkeys.ActionConstants;
 import com.android.internal.util.hwkeys.ActionUtils;
 import com.android.internal.util.hwkeys.PackageMonitor;
