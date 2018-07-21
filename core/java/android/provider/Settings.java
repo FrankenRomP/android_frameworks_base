@@ -4421,6 +4421,16 @@ public final class Settings {
         public static final String TORCH_LONG_PRESS_POWER_TIMEOUT = "torch_long_press_power_timeout";
 
         /**
+         * @hide
+         */
+        public static final String OMNI_USE_BOTTOM_GESTURE_NAVIGATION =
+                "use_bottom_gesture_navigation";
+
+        /** @hide */
+        private static final Validator OMNI_USE_BOTTOM_GESTURE_NAVIGATION_VALIDATOR =
+                BOOLEAN_VALIDATOR;
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -4489,6 +4499,7 @@ public final class Settings {
             OMNI_BUTTON_EXTRA_KEY_MAPPING,
             OMNI_DEVICE_PROXI_CHECK_ENABLED,
             OMNI_DEVICE_FEATURE_SETTINGS,
+            OMNI_USE_BOTTOM_GESTURE_NAVIGATION,
         };
 
         /**
@@ -4613,6 +4624,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(OMNI_BUTTON_EXTRA_KEY_MAPPING);
             PRIVATE_SETTINGS.add(OMNI_DEVICE_PROXI_CHECK_ENABLED);
             PRIVATE_SETTINGS.add(OMNI_DEVICE_FEATURE_SETTINGS);
+            PRIVATE_SETTINGS.add(OMNI_USE_BOTTOM_GESTURE_NAVIGATION);
         }
 
 
@@ -4720,6 +4732,8 @@ public final class Settings {
             VALIDATORS.put(OMNI_BUTTON_EXTRA_KEY_MAPPING, OMNI_BUTTON_EXTRA_KEY_MAPPING_VALIDATOR);
             VALIDATORS.put(OMNI_DEVICE_PROXI_CHECK_ENABLED, OMNI_DEVICE_PROXI_CHECK_ENABLED_VALIDATOR);
             VALIDATORS.put(OMNI_DEVICE_FEATURE_SETTINGS, OMNI_DEVICE_FEATURE_SETTINGS_VALIDATOR);
+            VALIDATORS.put(OMNI_USE_BOTTOM_GESTURE_NAVIGATION,
+                    OMNI_USE_BOTTOM_GESTURE_NAVIGATION_VALIDATOR);
         }
 
         /**
