@@ -44,4 +44,7 @@
     <!-- Gesture Sensor -->
     <java-symbol type="bool" name="config_enableGestureService" />
 
+    <!-- Usb drive persistent notification -->
+    <java-symbol type="bool" name="config_persistUsbDriveNotification" />
+
 </resources>
