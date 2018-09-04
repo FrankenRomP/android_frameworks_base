@@ -8946,6 +8946,12 @@ public final class Settings {
         public static final String NIGHT_BRIGHTNESS_VALUE = "night_brightness_value";
 
         /**
+         * Which port to use for ADB Over Network
+         * @hide
+         */
+        public static final String ADB_PORT = "adb_port";
+
+        /**
          * Whether to show the brightness slider in quick settings panel
          * @hide
          */
