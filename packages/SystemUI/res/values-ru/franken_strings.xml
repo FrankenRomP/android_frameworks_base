@@ -55,14 +55,6 @@
     <string name="keyguard_indication_dash_charging_time">Dash зарядка (<xliff:g id="charging_time_left" example="4 hours and 2 minutes">%s</xliff:g> до полной)</string>
     <string name="keyguard_plugged_in_dash_charging">Dash зарядка</string>
 
-    <!-- QS Config -->
-    <string name="qs_menu_item_columns">Столбцы</string>
-    <string name="qs_menu_item_columns_landscape">Столбцы в ландш.</string>
-    <string name="qs_menu_item_reset">Сброс</string>
-    <string name="qs_menu_item_titles">Отображать подписи</string>
-    <string name="qs_menu_item_rows">Ряды</string>
-    <string name="qs_menu_item_rows_landscape">Ряды в ландш.</string>
-
     <string name="status_bar_roaming">Роуминг</string>
 
     <string name="status_bar_data_saver">Экономия трафика</string>
