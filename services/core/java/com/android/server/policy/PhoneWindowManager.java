@@ -6176,7 +6176,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         Slog.i(TAG, "isActivityLaunchEvent from DeviceKeyHandler " + eventLaunchActivity);
                     }
                     wakeUp(event.getEventTime(), mAllowTheaterModeWakeFromKey, "android.policy:KEY");
-                    LiquidUtils.launchKeyguardDismissIntent(mContext, UserHandle.CURRENT, eventLaunchActivity);
+                    FrankenUtils.launchKeyguardDismissIntent(mContext, UserHandle.CURRENT, eventLaunchActivity);
                     result &= ~ACTION_PASS_TO_USER;
                     return result;
                 }
@@ -8587,13 +8587,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     public void sendCustomAction(Intent intent) {
         String action = intent.getAction();
         if (action != null) {
-            if (LiquidUtils.INTENT_SCREENSHOT.equals(action)) {
+            if (FrankenUtils.INTENT_SCREENSHOT.equals(action)) {
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_SURFACE_FLINGER,
                         TAG + "sendCustomAction permission denied");
                 mHandler.removeCallbacks(mScreenshotRunnable);
                 mScreenshotRunnable.setScreenshotType(TAKE_SCREENSHOT_FULLSCREEN);
                 mHandler.post(mScreenshotRunnable);
-            } else if (LiquidUtils.INTENT_REGION_SCREENSHOT.equals(action)) {
+            } else if (FrankenUtils.INTENT_REGION_SCREENSHOT.equals(action)) {
                 mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_SURFACE_FLINGER,
                         TAG + "sendCustomAction permission denied");
                 mHandler.removeCallbacks(mScreenshotRunnable);
