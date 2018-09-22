@@ -108,12 +108,10 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 R.dimen.rounded_corner_content_padding);
         int padding_alt = mContext.getResources().getDimensionPixelSize(
                 R.dimen.rounded_corner_content_padding_alt);
-        int qsPadding = mContext.getResources().getDimensionPixelSize(
-                R.dimen.qs_corner_content_padding);
         if (padding != 0 && Build.PRODUCT.equals("taimen")) {
-            setupPadding(padding, qsPadding);
+            setupPadding(padding);
         } else {
-            setupPadding(padding_alt, qsPadding);
+            setupPadding(padding_alt);
         }
 
         mDisplayListener = new DisplayManager.DisplayListener() {
@@ -286,7 +284,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
                 com.android.internal.R.bool.config_fillMainBuiltInDisplayCutout);
     }
 
-    private void setupPadding(int padding, int qsPadding) {
+    private void setupPadding(int padding) {
         // Add some padding to all the content near the edge of the screen.
         StatusBar sb = getComponent(StatusBar.class);
         View statusBar = (sb != null ? sb.getStatusBarWindow() : null);
@@ -297,10 +295,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             FragmentHostManager fragmentHostManager = FragmentHostManager.get(statusBar);
             fragmentHostManager.addTagListener(CollapsedStatusBarFragment.TAG,
                     new TunablePaddingTagListener(padding, R.id.status_bar));
-            if (qsPadding != 0) {
-                fragmentHostManager.addTagListener(QS.TAG,
-                        new TunablePaddingTagListener(qsPadding, R.id.header));
-            }
+            fragmentHostManager.addTagListener(QS.TAG,
+                    new TunablePaddingTagListener(padding, R.id.header));
         }
     }
 
