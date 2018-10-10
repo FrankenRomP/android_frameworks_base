@@ -762,12 +762,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         default void setExpansion(float expansion) {}
     }
 
-    private void configureTile(QSTile t, QSTileView v) {
-        if (mTileLayout != null) {
-            v.setHideLabel(!mTileLayout.isShowTitles());
-        }
-    }
-
     private void setAnimationTile(QSTileView v) {
         ObjectAnimator animTile = null;
         int animStyle = Settings.System.getIntForUser(mContext.getContentResolver(),
@@ -821,6 +815,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     private void configureTile(QSTile t, QSTileView v) {
         if (mTileLayout != null) {
+        	v.setHideLabel(!mTileLayout.isShowTitles());
             v.setOnClickListener(view -> {
                     t.click();
                     setAnimationTile(v);
