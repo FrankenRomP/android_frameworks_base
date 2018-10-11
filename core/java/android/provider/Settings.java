@@ -4277,7 +4277,6 @@ public final class Settings {
          */
         public static final String OMNI_QS_LAYOUT_ROWS_LANDSCAPE = "qs_layout_rows_landscape";
 
-<<<<<<< HEAD
         /** @hide */
         private static final Validator OMNI_QS_LAYOUT_ROWS_LANDSCAPE_VALIDATOR =
                 ANY_INTEGER_VALIDATOR;
