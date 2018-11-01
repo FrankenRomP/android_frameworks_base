@@ -23,6 +23,7 @@ import static com.android.systemui.Interpolators.ALPHA_OUT;
 import static com.android.systemui.OverviewProxyService.DEBUG_OVERVIEW_PROXY;
 import static com.android.systemui.OverviewProxyService.TAG_OPS;
 import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_HOME;
+import static com.android.systemui.shared.system.NavigationBarCompat.HIT_TARGET_ROTATION;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -228,15 +229,19 @@ public class QuickStepController implements GestureHelper {
                 mAllowGestureDetection = true;
 
                 // don't check double tap or navbar home action if full gesture mode or dt2s are disabled
-                // or if we tap on the home button
+                // or if we tap on the home or rotation button
                 if (!mNavigationBarView.isFullGestureMode()
-                        || mNavigationBarView.getDownHitTarget() == HIT_TARGET_HOME) break;
+                        || mNavigationBarView.getDownHitTarget() == HIT_TARGET_HOME
+                        || mNavigationBarView.getDownHitTarget() == HIT_TARGET_ROTATION) {
+                        wasConsumed = true;
+                        break;
+                }
                 if (mNavigationBarView.isDt2s() && isDoubleTapPending) {
                     // this is the 2nd tap, so let's trigger the double tap action
                     isDoubleTapPending = false;
                     wasConsumed = true;
                     mHandler.removeCallbacks(mDoubleTapCancelTimeout);
-                    Utils.switchScreenOff(mContext);
+                    FrankenUtils.switchScreenOff(mContext);
                 } else {
                     // this is the first tap, let's go further and schedule a
                     // mDoubleTapCancelTimeout call in the action up event so after the set time
@@ -351,7 +356,7 @@ public class QuickStepController implements GestureHelper {
                }
 
                 if (mBackActionScheduled) {
-                    Utils.sendKeycode(KeyEvent.KEYCODE_BACK);
+                    FrankenUtils.sendKeycode(KeyEvent.KEYCODE_BACK);
                 } else {
                     endQuickScrub(true /* animate */);
                 }
@@ -374,7 +379,7 @@ public class QuickStepController implements GestureHelper {
             wasConsumed = false;
             isDoubleTapPending = false;
             // it was a single tap, let's trigger the home button action
-            Utils.sendKeycode(KeyEvent.KEYCODE_HOME);
+            FrankenUtils.sendKeycode(KeyEvent.KEYCODE_HOME);
         }
     };
 
