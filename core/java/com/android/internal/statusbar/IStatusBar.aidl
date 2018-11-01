@@ -152,8 +152,9 @@ oneway interface IStatusBar
     void hideFingerprintDialog();
 
     /**
-     * LIQUID
+     * FRANKEN
      */
     void toggleCameraFlash();
     void setAutoRotate(boolean enabled);
+    void leftInLandscapeChanged(boolean isLeft);
 }

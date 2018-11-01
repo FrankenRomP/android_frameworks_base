@@ -481,6 +481,7 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
+<<<<<<< HEAD
     @Override
     public void toggleRecentApps() {
         enforceStatusBarService();
@@ -517,13 +518,30 @@ public class StatusBarManagerService extends IStatusBarService.Stub {
         }
     }
 
-    @Override
+     @Override
     public void cancelPreloadRecentApps() {
         enforceStatusBarService();
 
         if (mBar != null) {
             try {
                 mBar.cancelPreloadRecentApps();
+            } catch (RemoteException ex) {
+            }
+        }
+    }
+
+    /**
+     * Window manager notifies SystemUI of navigation bar "left in landscape" changes
+     *
+     * @hide
+     */
+    @Override
+    public void leftInLandscapeChanged(boolean isLeft) {
+        enforceStatusBar();
+
+        if (mBar != null) {
+            try {
+                mBar.leftInLandscapeChanged(isLeft);
             } catch (RemoteException ex) {
             }
         }
