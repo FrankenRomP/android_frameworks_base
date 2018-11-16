@@ -170,11 +170,16 @@
   <!-- In call notification vibration strength -->
   <java-symbol type="integer" name="config_in_call_notification_vibration_strength" />
 
+
+  <!-- Whether device has turbo power charging support -->
+  <java-symbol type="bool" name="config_hasTurboPowerCharger" />
+
   <!-- Doze mode -->
   <java-symbol type="bool" name="config_doze_enabled_by_default" />
 
   <!-- Screenrecord -->
   <java-symbol type="bool" name="config_enableScreenrecordChord" />
+
 
 </resources>
 
