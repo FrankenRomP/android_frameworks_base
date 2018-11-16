@@ -1016,7 +1016,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mAppTransition.registerListenerLocked(mActivityManagerAppTransitionNotifier);
 
         final AnimationHandler animationHandler = new AnimationHandler();
-        animationHandler.setProvider(new SfVsyncFrameCallbackProvider());
         mBoundsAnimationController = new BoundsAnimationController(context, mAppTransition,
                 AnimationThread.getHandler(), animationHandler);
 
@@ -1072,7 +1071,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, TAG_WM);
         mHoldingScreenWakeLock.setReferenceCounted(false);
 
-        mSurfaceAnimationRunner = new SurfaceAnimationRunner();
+        mSurfaceAnimationRunner = new SurfaceAnimationRunner(mPowerManagerInternal);
 
         mAllowTheaterModeWakeFromLayout = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromWindowLayout);
@@ -1894,6 +1893,13 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             win.setFrameNumber(frameNumber);
+
+            if (win.mPendingForcedSeamlessRotate != null && !mWaitingForConfig) {
+                win.mPendingForcedSeamlessRotate.finish(win.mToken, win);
+                win.mFinishForcedSeamlessRotateFrameNumber = win.getFrameNumber();
+                win.mPendingForcedSeamlessRotate = null;
+            }
+
             int attrChanges = 0;
             int flagChanges = 0;
             if (attrs != null) {
@@ -6237,6 +6243,17 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     /**
+     * Returns true if the callingUid has any window currently visible to the user.
+     */
+    public boolean isAnyWindowVisibleForUid(int callingUid) {
+        synchronized (mWindowMap) {
+            return mRoot.forAllWindows(w -> {
+                return w.getOwningUid() == callingUid && w.isVisible();
+            }, true /* traverseTopToBottom */);
+        }
+    }
+
+    /**
      * Called when a task has been removed from the recent tasks list.
      * <p>
      * Note: This doesn't go through {@link TaskWindowContainerController} yet as the window
@@ -7633,5 +7650,10 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public boolean isGestureButtonRegion(int i, int i2) {
         return this.mPolicy.isGestureButtonRegion(i, i2);
+    }
+
+    @Override
+    public void screenRecordAction(int mode) {
+        mPolicy.screenRecordAction(mode);
     }
 }

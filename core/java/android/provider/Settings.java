@@ -5021,6 +5021,116 @@ public final class Settings {
         public static final String NETWORK_TRAFFIC_HIDEARROW = "network_traffic_hidearrow";
 
         /**
+         * @hide
+         */
+        public static final String SCREENRECORD_QUALITY_MODE = "screenrecord_quality_mode";
+
+        /**
+         * @hide
+         */
+        public static final String FULL_GESTURE_NAVBAR = "full_gesture_navbar";
+
+        /**
+         * @hide
+         */
+        public static final String FULL_GESTURE_NAVBAR_DT2S = "full_gesture_navbar_dt2s";
+
+        /**
+         * Fling pulse music visualizer
+         *
+         * @hide
+         */
+        public static final String FLING_PULSE_ENABLED = "fling_pulse_enabled";
+
+        /**
+         * Fling pulse music visualizer color
+         *
+         * @hide
+         */
+        public static final String FLING_PULSE_COLOR = "fling_pulse_color";
+
+        /**
+         * Fling pulse lavalamp
+         *
+         * @hide
+         */
+        public static final String FLING_PULSE_LAVALAMP_ENABLED = "fling_pulse_lavalamp_enabled";
+
+        /**
+         * Fling pulse lavalamp animation speed
+         *
+         * @hide
+         */
+        public static final String FLING_PULSE_LAVALAMP_SPEED = "fling_pulse_lavalamp_speed";
+
+        /**
+         * Pulse renderer implementation
+         *
+         * @hide
+         */
+        public static final String PULSE_RENDER_STYLE_URI = "pulse_render_style";
+
+        /**
+         * Custom Pulse Widths
+         * @hide
+         */
+        public static final String PULSE_CUSTOM_DIMEN = "pulse_custom_dimen";
+
+        /**
+         * Custom Spacing Between Pulse Bars
+         * @hide
+         */
+        public static final String PULSE_CUSTOM_DIV = "pulse_custom_div";
+
+        /**
+         * Custom Pulse Block Size
+         * @hide
+         */
+        public static final String PULSE_FILLED_BLOCK_SIZE = "pulse_filled_block_size";
+
+        /**
+         * Custom Spacing Between Pulse Blocks
+         * @hide
+         */
+        public static final String PULSE_EMPTY_BLOCK_SIZE = "pulse_empty_block_size";
+
+        /**
+         * Custom Pulse Sanity Levels
+         * @hide
+         */
+        public static final String PULSE_CUSTOM_FUDGE_FACTOR = "pulse_custom_fudge_factor";
+
+        /**
+         * Pulse Fudge Factor
+         * @hide
+         */
+        public static final String PULSE_SOLID_FUDGE_FACTOR = "pulse_solid_fudge_factor";
+
+        /**
+         * Pulse Lavamp Animation Speed
+         * @hide
+         */
+        public static final String PULSE_LAVALAMP_SOLID_SPEED = "lava_lamp_solid_speed";
+
+        /**
+         * Pulse Solid units count
+         * @hide
+         */
+        public static final String PULSE_SOLID_UNITS_COUNT = "pulse_solid_units_count";
+
+        /**
+         * Pulse Solid units opacity
+         * @hide
+         */
+        public static final String PULSE_SOLID_UNITS_OPACITY = "pulse_solid_units_opacity";
+
+        /**
+         * Whether to use automatic color for Pulse
+         * @hide
+         */
+        public static final String PULSE_AUTO_COLOR = "pulse_auto_color";
+
+        /**
          * Settings to backup. This is here so that it's in the same place as the settings
          * keys and easy to update.
          *
@@ -8539,9 +8649,6 @@ public final class Settings {
          */
         public static final String ASSIST_GESTURE_SENSITIVITY = "assist_gesture_sensitivity";
 
-        private static final Validator ASSIST_GESTURE_SENSITIVITY_VALIDATOR =
-                new SettingsValidators.InclusiveFloatRangeValidator(0.0f, 1.0f);
-
         /**
          * Whether the assist gesture should silence alerts.
          *
@@ -8570,8 +8677,6 @@ public final class Settings {
          * @hide
          */
         public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
-
-        private static final Validator ASSIST_GESTURE_SETUP_COMPLETE_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
          * Control whether Night display is currently activated.
@@ -9085,8 +9190,6 @@ public final class Settings {
             NFC_PAYMENT_DEFAULT_COMPONENT,
             AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
             ASSIST_GESTURE_ENABLED,
-            ASSIST_GESTURE_SENSITIVITY,
-            ASSIST_GESTURE_SETUP_COMPLETE,
             ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
             ASSIST_GESTURE_WAKE_ENABLED,
             VR_DISPLAY_MODE,
@@ -9226,8 +9329,6 @@ public final class Settings {
             VALIDATORS.put(AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN,
                     AUTOMATIC_STORAGE_MANAGER_DAYS_TO_RETAIN_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_ENABLED, ASSIST_GESTURE_ENABLED_VALIDATOR);
-            VALIDATORS.put(ASSIST_GESTURE_SENSITIVITY, ASSIST_GESTURE_SENSITIVITY_VALIDATOR);
-            VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, ASSIST_GESTURE_SETUP_COMPLETE_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SILENCE_ALERTS_ENABLED,
                     ASSIST_GESTURE_SILENCE_ALERTS_ENABLED_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_WAKE_ENABLED, ASSIST_GESTURE_WAKE_ENABLED_VALIDATOR);
@@ -11586,6 +11687,15 @@ public final class Settings {
          * @see com.android.server.am.ActivityManagerConstants
          */
         public static final String ACTIVITY_MANAGER_CONSTANTS = "activity_manager_constants";
+
+        /**
+         * Feature flag to enable or disable the activity starts logging feature.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String ACTIVITY_STARTS_LOGGING_ENABLED
+                = "activity_starts_logging_enabled";
 
         /**
          * App ops specific settings.

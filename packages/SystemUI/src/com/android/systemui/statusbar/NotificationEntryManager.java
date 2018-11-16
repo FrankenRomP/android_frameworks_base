@@ -129,6 +129,9 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected boolean mDisableNotificationAlerts;
     protected NotificationListContainer mListContainer;
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
+
+    private NotificationData.Entry mEntryToRefresh;
+
     /**
      * Notifications with keys in this set are not actually around anymore. We kept them around
      * when they were canceled in response to a remote input interaction. This allows us to show
@@ -470,6 +473,17 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             mPresenter.updateNotificationViews();
         }
         entry.row.setLowPriorityStateUpdated(false);
+
+        if (mEntryToRefresh == entry) {
+            final Notification n = entry.notification.getNotification();
+            final int[] colors = {n.backgroundColor, n.foregroundColor,
+                    n.primaryTextColor, n.secondaryTextColor};
+            mMediaManager.setPulseColors(n.isColorizedMedia(), colors);
+        }
+    }
+
+    public void setEntryToRefresh(NotificationData.Entry entry) {
+        mEntryToRefresh = entry;
     }
 
     @Override
@@ -667,9 +681,15 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                     entry.row.getNotificationChildren();
             for (int i = 0; i < notificationChildren.size(); i++) {
                 ExpandableNotificationRow row = notificationChildren.get(i);
-                if ((row.getStatusBarNotification().getNotification().flags
-                        & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
-                    // the child is a foreground service notification which we can't remove!
+                NotificationData.Entry childEntry = row.getEntry();
+                boolean isForeground = (row.getStatusBarNotification().getNotification().flags
+                        & Notification.FLAG_FOREGROUND_SERVICE) != 0;
+                boolean keepForReply = FORCE_REMOTE_INPUT_HISTORY
+                        && (shouldKeepForRemoteInput(childEntry)
+                                || shouldKeepForSmartReply(childEntry));
+                if (isForeground || keepForReply) {
+                    // the child is a foreground service notification which we can't remove or it's
+                    // a child we're keeping around for reply!
                     continue;
                 }
                 row.setKeepInParent(true);

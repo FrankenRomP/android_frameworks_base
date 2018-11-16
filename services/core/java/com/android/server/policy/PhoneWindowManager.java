@@ -78,6 +78,7 @@ import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NAV_HIDE_FORCED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_HIDE_FORCED;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_STATUS_BAR_EXPANDED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WAS_NOT_FULLSCREEN;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
@@ -123,6 +124,9 @@ import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION_STA
 import static android.view.WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.isSystemAlertWindowType;
+import static android.view.WindowManager.SCREEN_RECORD_LOW_QUALITY;
+import static android.view.WindowManager.SCREEN_RECORD_MID_QUALITY;
+import static android.view.WindowManager.SCREEN_RECORD_HIGH_QUALITY;
 import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 import static android.view.WindowManager.TAKE_SCREENSHOT_SELECTED_REGION;
 import static android.view.WindowManagerGlobal.ADD_OKAY;
@@ -173,6 +177,7 @@ import android.app.StatusBarManager;
 import android.app.UiModeManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -185,6 +190,7 @@ import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.content.ServiceConnection;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -213,6 +219,7 @@ import android.os.IBinder;
 import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
+import android.os.Messenger;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.Process;
@@ -812,6 +819,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private boolean mScreenshotChordVolumeDownKeyTriggered;
     private long mScreenshotChordVolumeDownKeyTime;
     private boolean mScreenshotChordVolumeDownKeyConsumed;
+    // screenrecord
+    private boolean mScreenrecordChordEnabled;
+    private boolean mScreenrecordChordVolumeUpKeyTriggered;
+    private long mScreenrecordChordVolumeUpKeyTime;
+    private boolean mScreenrecordChordVolumeUpKeyConsumed;
+    // end screenrecord
     private boolean mA11yShortcutChordVolumeUpKeyTriggered;
     private long mA11yShortcutChordVolumeUpKeyTime;
     private boolean mA11yShortcutChordVolumeUpKeyConsumed;
@@ -1501,6 +1514,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             mScreenshotChordPowerKeyTime = event.getDownTime();
             interceptScreenshotChord();
             interceptRingerToggleChord();
+            interceptScreenrecordChord();
         }
 
         // Stop ringing or end call if configured to do so when power is pressed.
@@ -1537,6 +1551,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // If the power key has still not yet been handled, then detect short
         // press, long press, or multi press and decide what to do.
         mPowerKeyHandled = hungUp || mScreenshotChordVolumeDownKeyTriggered
+                || mScreenrecordChordVolumeUpKeyTriggered
                 || mA11yShortcutChordVolumeUpKeyTriggered || gesturedServiceIntercepted;
         if (!mPowerKeyHandled) {
             if (interactive) {
@@ -1922,6 +1937,20 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
     }
 
+    private void interceptScreenrecordChord() {
+        if (mScreenrecordChordEnabled && mScreenrecordChordVolumeUpKeyTriggered
+                && mScreenshotChordPowerKeyTriggered) {
+            final long now = SystemClock.uptimeMillis();
+            if (now <= mScreenrecordChordVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS
+                    && now <= mScreenshotChordPowerKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS) {
+                mScreenrecordChordVolumeUpKeyConsumed = true;
+                cancelPendingPowerKeyAction();
+
+                mHandler.postDelayed(mScreenrecordRunnable, getScreenshotChordLongPressDelay());
+            }
+        }
+    }
+
     private void interceptAccessibilityShortcutChord() {
         if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(isKeyguardLocked())
                 && mScreenshotChordVolumeDownKeyTriggered && mA11yShortcutChordVolumeUpKeyTriggered
@@ -1980,6 +2009,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         mHandler.removeCallbacks(mScreenshotRunnable);
     }
 
+    private void cancelPendingScreenrecordChordAction() {
+        mHandler.removeCallbacks(mScreenrecordRunnable);
+    }
+
     private void cancelPendingAccessibilityShortcutAction() {
         mHandler.removeMessages(MSG_ACCESSIBILITY_SHORTCUT);
     }
@@ -2013,6 +2046,29 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     private final ScreenshotRunnable mScreenshotRunnable = new ScreenshotRunnable();
+
+    private class ScreenrecordRunnable implements Runnable {
+        private int mMode = SCREEN_RECORD_LOW_QUALITY;
+         public void setMode(int mode) {
+            mMode = mode;
+        }
+
+        @Override
+        public void run() {
+            takeScreenrecord(mMode);
+        }
+    }
+
+    private final ScreenrecordRunnable mScreenrecordRunnable = new ScreenrecordRunnable();
+
+    @Override
+    public void screenRecordAction(int mode) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_SURFACE_FLINGER,
+                TAG + "screenRecordAction permission denied");
+        mHandler.removeCallbacks(mScreenrecordRunnable);
+        mScreenrecordRunnable.setMode(mode);
+        mHandler.post(mScreenrecordRunnable);
+    }
 
     @Override
     public void showGlobalActions() {
@@ -2511,6 +2567,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
         mScreenshotChordEnabled = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_enableScreenshotChord);
+
+        mScreenrecordChordEnabled = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_enableScreenrecordChord);
 
         mGlobalKeyManager = new GlobalKeyManager(mContext);
 
@@ -4126,6 +4185,26 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // If we think we might have a volume up & power key chord on the way
+        // but we're not sure, then tell the dispatcher to wait a little while and
+        // try again later before dispatching.
+        if (mScreenrecordChordEnabled && (flags & KeyEvent.FLAG_FALLBACK) == 0) {
+            if (mScreenrecordChordVolumeUpKeyTriggered && !mScreenshotChordPowerKeyTriggered) {
+                final long now = SystemClock.uptimeMillis();
+                final long timeoutTime = mScreenrecordChordVolumeUpKeyTime + SCREENSHOT_CHORD_DEBOUNCE_DELAY_MILLIS;
+                if (now < timeoutTime) {
+                    return timeoutTime - now;
+                }
+            }
+            if (keyCode == KeyEvent.KEYCODE_VOLUME_UP
+                    && mScreenrecordChordVolumeUpKeyConsumed) {
+                if (!down) {
+                    mScreenrecordChordVolumeUpKeyConsumed = false;
+                }
+                return -1;
+            }
+        }
+
         // If an accessibility shortcut might be partially complete, hold off dispatching until we
         // know if it is complete or not
         if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(false)
@@ -4942,17 +5021,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             if (isKeyguardShowingAndNotOccluded()) {
                 // don't launch home if keyguard showing
                 return;
-            } else if (mKeyguardOccluded && mKeyguardDelegate.isShowing()) {
-                mKeyguardDelegate.dismiss(new KeyguardDismissCallback() {
-                    @Override
-                    public void onDismissSucceeded() throws RemoteException {
-                        mHandler.post(() -> {
-                            startDockOrHome(true /*fromHomeKey*/, awakenFromDreams);
-                        });
-                    }
-                }, null /* message */);
-                return;
-            } else if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
+            }
+
+            if (!mKeyguardOccluded && mKeyguardDelegate.isInputRestricted()) {
                 // when in keyguard restricted mode, must first verify unlock
                 // before launching home
                 mKeyguardDelegate.verifyUnlock(new OnKeyguardExitResult() {
@@ -5239,8 +5310,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 navTranslucent &= areTranslucentBarsAllowed();
             }
             boolean statusBarExpandedNotKeyguard = !isKeyguardShowing && mStatusBar != null
-                    && mStatusBar.getAttrs().height == MATCH_PARENT
-                    && mStatusBar.getAttrs().width == MATCH_PARENT;
+                    && (mStatusBar.getAttrs().privateFlags & PRIVATE_FLAG_STATUS_BAR_EXPANDED) != 0;
 
             // When the navigation bar isn't visible, we put up a fake input window to catch all
             // touch events. This way we can detect when the user presses anywhere to bring back the
@@ -5418,6 +5488,17 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mStatusBarController.checkHiddenLw();
     }
 
+    private void notifyLeftInLandscapeChanged(boolean isOnLeft) {
+        IStatusBarService sbar = getStatusBarService();
+        if (sbar != null) {
+            try {
+                sbar.leftInLandscapeChanged(isOnLeft);
+            } catch (RemoteException e1) {
+                // oops, no statusbar. Ignore event.
+            }
+        }
+    }
+
     private boolean layoutNavigationBar(DisplayFrames displayFrames, int uiMode, Rect dcf,
             boolean navVisible, boolean navTranslucent, boolean navAllowedHidden,
             boolean statusBarExpandedNotKeyguard) {
@@ -5432,7 +5513,15 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         final int displayHeight = displayFrames.mDisplayHeight;
         final int displayWidth = displayFrames.mDisplayWidth;
         final Rect dockFrame = displayFrames.mDock;
+        int lastNavbarPosition = mNavigationBarPosition;
         mNavigationBarPosition = navigationBarPosition(displayWidth, displayHeight, rotation);
+        // broadcast left in landscape changes to listeners
+        if (lastNavbarPosition == NAV_BAR_LEFT && mNavigationBarPosition != NAV_BAR_LEFT) {
+            notifyLeftInLandscapeChanged(false);
+        } else if (lastNavbarPosition != NAV_BAR_LEFT
+                && mNavigationBarPosition == NAV_BAR_LEFT) {
+            notifyLeftInLandscapeChanged(true);
+        }
 
         final Rect cutoutSafeUnrestricted = mTmpRect;
         cutoutSafeUnrestricted.set(displayFrames.mUnrestricted);
@@ -6270,7 +6359,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         }
 
         // Take note if a window wants to acquire a sleep token.
-        if (win.isVisibleLw() && (attrs.privateFlags & PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN) != 0
+        if ((attrs.privateFlags & PRIVATE_FLAG_ACQUIRES_SLEEP_TOKEN) != 0
                 && win.canAcquireSleepToken()) {
             mWindowSleepTokenNeeded = true;
         }
@@ -6326,9 +6415,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 mStatusBarController.setShowTransparent(true /* transparent */);
             }
 
-            WindowManager.LayoutParams statusBarAttrs = mStatusBar.getAttrs();
-            boolean statusBarExpanded = statusBarAttrs.height == MATCH_PARENT
-                    && statusBarAttrs.width == MATCH_PARENT;
+            boolean statusBarExpanded =
+                    (mStatusBar.getAttrs().privateFlags & PRIVATE_FLAG_STATUS_BAR_EXPANDED) != 0;
             boolean topAppHidesStatusBar = topAppHidesStatusBar();
             if (mForceStatusBar || mForceStatusBarFromKeyguard || mForceStatusBarTransparent
                     || statusBarExpanded) {
@@ -6586,6 +6674,77 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         setHdmiPlugged(!mHdmiPlugged);
     }
 
+    final Object mScreenrecordLock = new Object();
+    ServiceConnection mScreenrecordConnection = null;
+
+    final Runnable mScreenrecordTimeout = new Runnable() {
+        @Override public void run() {
+            synchronized (mScreenrecordLock) {
+                if (mScreenrecordConnection != null) {
+                    mContext.unbindService(mScreenrecordConnection);
+                    mScreenrecordConnection = null;
+                }
+            }
+        }
+    };
+
+    // Assume this is called from the Handler thread.
+    private void takeScreenrecord(final int mode) {
+        synchronized (mScreenrecordLock) {
+            if (mScreenrecordConnection != null) {
+                return;
+            }
+            ComponentName cn = new ComponentName("com.android.systemui",
+                    "com.android.systemui.franken.screenrecord.TakeScreenrecordService");
+            Intent intent = new Intent();
+            intent.setComponent(cn);
+            ServiceConnection conn = new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    synchronized (mScreenrecordLock) {
+                        Messenger messenger = new Messenger(service);
+                        Message msg = Message.obtain(null, mode);
+                        final ServiceConnection myConn = this;
+                        Handler h = new Handler(mHandler.getLooper()) {
+                            @Override
+                            public void handleMessage(Message msg) {
+                                synchronized (mScreenrecordLock) {
+                                    if (mScreenrecordConnection == myConn) {
+                                        mContext.unbindService(mScreenrecordConnection);
+                                        mScreenrecordConnection = null;
+                                        mHandler.removeCallbacks(mScreenrecordTimeout);
+                                    }
+                                }
+                            }
+                        };
+                        msg.replyTo = new Messenger(h);
+                        msg.arg1 = msg.arg2 = 0;
+                        try {
+                            messenger.send(msg);
+                        } catch (RemoteException e) {
+                        }
+                    }
+                }
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    synchronized (mScreenrecordLock) {
+                        if (mScreenrecordConnection != null) {
+                            mContext.unbindService(mScreenrecordConnection);
+                            mScreenrecordConnection = null;
+                            mHandler.removeCallbacks(mScreenrecordTimeout);
+                        }
+                    }
+                }
+            };
+            if (mContext.bindServiceAsUser(
+                    intent, conn, Context.BIND_AUTO_CREATE, UserHandle.CURRENT)) {
+                mScreenrecordConnection = conn;
+                // Screenrecord max duration is 30 minutes. Allow 32 minutes before killing
+                // the service.
+                mHandler.postDelayed(mScreenrecordTimeout, 32 * 60 * 1000);
+            }
+        }
+    }
 
     private boolean isHwKeysDisabled() {
         return mKeyHandler != null ? mKeyHandler.isHwKeysDisabled() : false;
@@ -6785,6 +6944,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             mScreenshotChordVolumeDownKeyTime = event.getDownTime();
                             mScreenshotChordVolumeDownKeyConsumed = false;
                             cancelPendingPowerKeyAction();
+                            cancelPendingScreenrecordChordAction();
                             interceptScreenshotChord();
                             interceptAccessibilityShortcutChord();
                         }
@@ -6792,26 +6952,34 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                         mScreenshotChordVolumeDownKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
                         cancelPendingAccessibilityShortcutAction();
+                        cancelPendingScreenrecordChordAction();
                     }
                 } else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
                     if (down) {
-                        if (interactive && !mA11yShortcutChordVolumeUpKeyTriggered
+                        if (interactive && (!mA11yShortcutChordVolumeUpKeyTriggered
+                                || !mScreenrecordChordVolumeUpKeyTriggered)
                                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
                             mA11yShortcutChordVolumeUpKeyTriggered = true;
                             mA11yShortcutChordVolumeUpKeyTime = event.getDownTime();
                             mA11yShortcutChordVolumeUpKeyConsumed = false;
+                            mScreenrecordChordVolumeUpKeyTriggered = true;
+                            mScreenrecordChordVolumeUpKeyTime = event.getDownTime();
+                            mScreenrecordChordVolumeUpKeyConsumed = false;
                             cancelPendingPowerKeyAction();
                             cancelPendingScreenshotChordAction();
                             cancelPendingRingerToggleChordAction();
 
+                            interceptScreenrecordChord();
                             interceptAccessibilityShortcutChord();
                             interceptRingerToggleChord();
                         }
                     } else {
                         mA11yShortcutChordVolumeUpKeyTriggered = false;
+                        mScreenrecordChordVolumeUpKeyTriggered = false;
                         cancelPendingScreenshotChordAction();
                         cancelPendingAccessibilityShortcutAction();
                         cancelPendingRingerToggleChordAction();
+                        cancelPendingScreenrecordChordAction();
                     }
                 }
                 if (down) {
@@ -6940,6 +7108,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
 
             case KeyEvent.KEYCODE_POWER: {
+                if (mTopFullscreenOpaqueWindowState != null
+                        && (mTopFullscreenOpaqueWindowState.getAttrs().privateFlags
+                                & WindowManager.LayoutParams.PRIVATE_FLAG_PREVENT_POWER_KEY) != 0
+                        && mScreenOnFully) {
+                    return result;
+                }
                 // Any activity on the power button stops the accessibility shortcut
                 cancelPendingAccessibilityShortcutAction();
                 result &= ~ACTION_PASS_TO_USER;

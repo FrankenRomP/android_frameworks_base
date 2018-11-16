@@ -236,6 +236,9 @@
     <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
 
+    <!-- screenrecord -->
+    <uses-permission android:name="android.permission.ACCESS_SURFACE_FLINGER" />
+
     <application
         android:name=".SystemUIApplication"
         android:persistent="true"
@@ -293,6 +296,12 @@
                 <data android:scheme="package" />
             </intent-filter>
         </receiver>
+
+        <!-- started from PhoneWindowManager
+             TODO: Should have an android:permission attribute -->
+        <service android:name=".franken.screenrecord.TakeScreenrecordService"
+            android:process=":screenrecord"
+            android:exported="false" />
 
         <service android:name=".ImageWallpaper"
                 android:permission="android.permission.BIND_WALLPAPER"
@@ -393,6 +402,21 @@
         <!-- Callback for deleting screenshot notification -->
         <receiver android:name=".screenshot.GlobalScreenshot$DeleteScreenshotReceiver"
             android:process=":screenshot"
+            android:exported="false" />
+
+        <!-- Springboard for launching the share activity -->
+        <receiver android:name=".franken.screenrecord.GlobalScreenrecord$ShareReceiver"
+            android:process=":screenrecord"
+            android:exported="false" />
+
+        <!-- Callback for dismissing screenrecord notification after a share target is picked -->
+        <receiver android:name=".franken.screenrecord.GlobalScreenrecord$TargetChosenReceiver"
+            android:process=":screenrecord"
+            android:exported="false" />
+
+        <!-- Callback for deleting screenrecord notification -->
+        <receiver android:name=".franken.screenrecord.GlobalScreenrecord$DeleteScreenrecordReceiver"
+            android:process=":screenrecord"
             android:exported="false" />
 
         <!-- started from UsbDeviceSettingsManager -->
