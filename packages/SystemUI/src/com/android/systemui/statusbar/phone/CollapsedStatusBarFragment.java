@@ -388,7 +388,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
                         animateShow(mFrankenLogo, animate);
                     }
                 } else {
-                    animateHide(mFrankenLogo, animate, false);
+                    animateHide(mFrankenLogo, animate);
                 }
             }
         } catch (Exception e) {
