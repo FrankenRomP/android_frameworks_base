@@ -78,24 +78,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private ImageView mFrankenLogo;
     private boolean mShowLogo;
 
-    private class LabSettingsObserver extends ContentObserver {
-        LabSettingsObserver(Handler handler) {
-            super(handler);
-        }
-
-        void observe() {
-            getContext().getContentResolver().registerContentObserver(Settings.System.getUriFor(
-                    Settings.System.STATUS_BAR_LOGO),
-                    false, this, UserHandle.USER_ALL);
-        }
-
-        @Override
-        public void onChange(boolean selfChange) {
-            updateLogoSettings(true);
-        }
-    }
-    private LabSettingsObserver mLabSettingsObserver = new LabSettingsObserver(mHandler);
-
     private class SettingsObserver extends ContentObserver {
        SettingsObserver(Handler handler) {
            super(handler);
@@ -105,6 +87,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
          mContentResolver.registerContentObserver(Settings.System.getUriFor(
                     Settings.System.STATUSBAR_CLOCK_STYLE),
                     false, this, UserHandle.USER_ALL);
+         mContentResolver.registerContentObserver(Settings.System.getUriFor(
+                    Settings.System.STATUS_BAR_LOGO),
+                    false, this, UserHandle.USER_ALL);
        }
 
        @Override
@@ -112,6 +97,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
            updateSettings(true);
        }
     }
+
     private SettingsObserver mSettingsObserver = new SettingsObserver(mHandler);
     private ContentResolver mContentResolver;
 
@@ -155,7 +141,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mFrankenLogo = (ImageView) mStatusBar.findViewById(R.id.status_bar_logo);
         Dependency.get(DarkIconDispatcher.class).addDarkReceiver(mFrankenLogo);
         updateSettings(false);
-        updateLogoSettings(false);
         showSystemIconArea(false);
         initEmergencyCryptkeeperText();
         initOperatorName();
@@ -183,10 +168,10 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onDestroyView() {
         super.onDestroyView();
         Dependency.get(StatusBarIconController.class).removeIconGroup(mDarkIconManager);
-        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mFrankenLogo);
         if (mNetworkController.hasEmergencyCryptKeeperText()) {
             mNetworkController.removeCallback(mSignalCallback);
         }
+        Dependency.get(DarkIconDispatcher.class).removeDarkReceiver(mFrankenLogo);
     }
 
     public void initNotificationIconArea(NotificationIconAreaController
@@ -270,6 +255,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public void hideNotificationIconArea(boolean animate) {
         animateHide(mNotificationIconAreaInner, animate, true);
+        if (mShowLogo) {
+            animateHide(mFrankenLogo, animate, true);
+        }
         animateHide(mCenterClockLayout, animate, true);
     }
 
@@ -365,8 +353,25 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     public void updateSettings(boolean animate) {
         mClockStyle = Settings.System.getIntForUser(mContentResolver,
-                Settings.System.STATUSBAR_CLOCK_STYLE, 0, UserHandle.USER_CURRENT);
+                Settings.System.STATUSBAR_CLOCK_STYLE, 0,
+                UserHandle.USER_CURRENT);
+        updateLogoSettings(animate);
         updateClockStyle(animate);
+    }
+
+    public void updateLogoSettings(boolean animate) {
+        mShowLogo = Settings.System.getIntForUser(
+            getContext().getContentResolver(), Settings.System.STATUS_BAR_LOGO, 0,
+            UserHandle.USER_CURRENT) == 1;
+        if (mNotificationIconAreaInner != null) {
+            if (mShowLogo) {
+                if (mNotificationIconAreaInner.getVisibility() == View.VISIBLE) {
+                    animateShow(mFrankenLogo, animate);
+                }
+            } else {
+                animateHide(mFrankenLogo, animate, false);
+            }
+        }
     }
 
     private void updateClockStyle(boolean animate) {
@@ -374,26 +379,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             animateHide(mClockView, animate, false);
         } else {
             animateShow(mClockView, animate);
-        }
-    }
-
-    public void updateLogoSettings(boolean animate) {
-        try {
-            mShowLogo = Settings.System.getIntForUser(
-                getContext().getContentResolver(), Settings.System.STATUS_BAR_LOGO, 0,
-                UserHandle.USER_CURRENT) == 1;
-            if (mNotificationIconAreaInner != null) {
-                if (mShowLogo) {
-                    if (mNotificationIconAreaInner.getVisibility() == View.VISIBLE) {
-                        animateShow(mFrankenLogo, animate);
-                    }
-                } else {
-                    animateHide(mFrankenLogo, animate);
-                }
-            }
-        } catch (Exception e) {
-            // never ever crash here
-            Slog.e(TAG, "updateLogoSettings(animate)", e);
         }
     }
 }
